@@ -27,7 +27,11 @@ if __name__ == "__main__":
 		schedule.tick(sub)
 		schedule.checkForExpiredJobs(sub)
 		schedule.removeExpiredJobs(sub)
-		schedule.handleRequest(requests.pop(0), sub)
+		success = schedule.handleRequest(requests.pop(0), sub)
+		if success:
+			schedule.tempToAlloc(sub)
+		else:
+			schedule.cancelAllocations(sub)
 		schedule.resetSFC(sub)
 		totalTime -= 1
 		print("\n")
