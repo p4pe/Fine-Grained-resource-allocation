@@ -1,9 +1,10 @@
 class SFC:
-	def __init__(self, id, duration):
+	def __init__(self, id, duration, arrivalTime):
 		self.id = id
 		self.vnfList = []
 		self.linkList = []
 		self.duration = duration
+		self.arrivalTime = arrivalTime
 		self.ticked = False
 
 	def getTotalMemory(self):
