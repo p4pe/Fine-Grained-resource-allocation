@@ -1,6 +1,7 @@
 from core import *
 from numa import *
 from bus import *
+from sfc import *
 import math
 import numpy as np
 
@@ -74,13 +75,61 @@ class SubstrateModel:
 			return (-1,-1)
 
 
+	# def partition(self, sfc):
+	# 	for vnf in sfc.vnfList:
+	# 		bestFit = self.l2Norm(vnf)
+	# 		if bestFit != (-1,-1):
+	# 			numaIndex = bestFit[0]
+	# 			cpuIndex = bestFit[1]
+	# 			self.numaList[numaIndex].processWithoutCoreAssignment(vnf)
+	# 			self.numaList[numaIndex].coreList[cpuIndex].process(vnf)
+	# 		else:
+	# 			return False
+	# 	return True
+
 	def partition(self, sfc):
-		for vnf in sfc.vnfList:
-			bestFit = self.l2Norm(vnf)
-			if bestFit != (-1,-1):
-				numaIndex = bestFit[0]
-				cpuIndex = bestFit[1]
-				self.numaList[numaIndex].processWithoutCoreAssignment(vnf)
-				self.numaList[numaIndex].coreList[cpuIndex].process(vnf)
+		maxLink = -1
+		maxBw = -1
+		found = False
+
+		for link in sfc.linkList:
+			if link.bandwidthDemand > maxBw:
+				maxBw = link.bandwidthDemand
+				maxLink = link
+
+		vnfs1 = []
+		links1 = []
+		vnfs2 = []
+		links2 = []
+
+		for link in sfc.linkList:
+			if not found:
+				if link!= maxLink:
+					vnfs1.append(link.vnf1)
+					vnfs1.append(link.vnf2)
+					links1.append(link)
+				else:
+					found = True
+					vnfs1.append(link.vnf1)
+					vnfs2.append(link.vnf2)
 			else:
-				return False
+				vnfs2.append(link.vnf1)
+				vnfs2.append(link.vnf2)
+				links2.append(link)
+
+		sfc1ID = sfc.id + "_part1"
+		sfc2ID = sfc.id + "_part2"
+
+		sfc1 = SFC(sfc1ID, sfc.duration, sfc.arrivalTime)
+		sfc1.vnfList = vnfs1
+		sfc1.linkList = links1
+
+		sfc2 = SFC(sfc2ID, sfc.duration, sfc.arrivalTime)
+		sfc2.vnfList = vnfs2
+		sfc2.linkList = links2
+
+		return [sfc1, sfc2]
+
+
+
+
