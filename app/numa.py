@@ -35,6 +35,15 @@ class NUMA:
 		print("numa ", self.id, " memory: ", self.memoryCapacity, " cpu: ", self.getTotalCPU())
 		self.printVNFS()
 
+	def cancelAllocations(self):
+		for core in self.coreList:
+			core.cancelAllocations()
+
 	def removeExpiredJobs(self):
 		for core in self.coreList:
 			core.removeExpiredJobs()
+
+
+	def tempToAlloc(self):
+		for core in self.coreList:
+			core.tempToAlloc()
