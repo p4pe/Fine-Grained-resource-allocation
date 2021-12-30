@@ -7,12 +7,12 @@ class Schedule:
 			bestFit = sub.l2Norm(vnf)
 			numaIndex = bestFit[0]
 			cpuIndex = bestFit[1]
-			sub.numaList[numaIndex].processWithoutCoreAssignment(vnf)
-			sub.numaList[numaIndex].coreList[cpuIndex].process(vnf)
+			sub.numaList[numaIndex].coreList[cpuIndex].tempAssign(vnf)
 
 
 	def handleRequest(self, sfc, sub):
 
+		success = True
 		print(" ------> SFC ", sfc.id)
 		print("SFC total VNFs: ", len(sfc.vnfList))
 		print("SFC total memory: ", sfc.getTotalMemory(), "SFC total CPU: ", sfc.getTotalCPU())
@@ -20,8 +20,11 @@ class Schedule:
 
 		if sfc.getTotalMemory() > sub.getTotalMemory(): # not enough memory in total
 			print("not enough memory. Dropping sfc ", sfc.id)
+			return False
+
 		elif sfc.getTotalCPU() > sub.getTotalCPU():	# not enough cpu in total
 			print("not enough CPU. Dropping sfc ", sfc.id)	
+			return False
 		
 		else: #search for candidate numas
 			candidateNumas = []
@@ -31,12 +34,20 @@ class Schedule:
 			print("found ", len(candidateNumas), " candidate numas.")
 
 			if len(candidateNumas) == 0: # need to partition
-				success = sub.partition(sfc)
-				if success:
-					print("Successfully partitioned SFC ", sfc.id)
-				else:
-					print("Failed in partitioning SFC ", sfc.id)
 
+				if len(sfc.vnfList) != 1:
+					partitions = sub.partition(sfc)
+					for part in partitions:
+						success = self.handleRequest(part, sub)
+				else:
+					vnf = sfc.vnfList[0]
+					bestFit = sub.l2Norm(vnf)
+					if bestFit != (-1,-1):
+						numaIndex = bestFit[0]
+						cpuIndex = bestFit[1]
+						sub.numaList[numaIndex].coreList[cpuIndex].tempAssign(vnf)
+					else:
+						success = False
 			else: # no need to partition. Sort and assign
 				success = self.fitInSingleCore(sfc, sub)
 				if success:
@@ -44,6 +55,7 @@ class Schedule:
 				else:
 					sortedCandidates = sorted(candidateNumas, key = lambda x: x.memoryCapacity, reverse = False)
 					self.assignToSingleNuma(sfc, sortedCandidates[0], sub)
+		return success
 
 	def fitInSingleCore(self, sfc, sub):
 		c = sfc.getTotalCPU()
@@ -54,11 +66,13 @@ class Schedule:
 				for cpu in numa.coreList:
 					if c <= cpu.capacity:
 						for vnf in sfc.vnfList:
-							cpu.process(vnf)
-							numa.processWithoutCoreAssignment(vnf)
+							cpu.tempAssign(vnf)
 						return True
 		return False
 
+	def cancelAllocations(self, sub):
+		for numa in sub.numaList:
+			numa.cancelAllocations()
 
 	def removeExpiredJobs(self, sub):
 		for numa in sub.numaList:
@@ -87,3 +101,17 @@ class Schedule:
 				core.clearExpiredJobs()
 				for vnf in core.vnfList:
 					vnf.sfc.ticked = False
+
+	def tempToAlloc(self, sub):
+		for numa in sub.numaList:
+			numa.tempToAlloc()
+
+
+
+
+
+
+
+
+
+		
