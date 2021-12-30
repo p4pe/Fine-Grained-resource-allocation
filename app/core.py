@@ -6,6 +6,7 @@ class Core:
 		self.capacity = initCapacity
 		self.vnfList = []
 		self.expiredJobs = []
+		self.tempVnfList = []
 
 	def process(self, vnf):
 		self.vnfList.append(vnf)
@@ -27,3 +28,21 @@ class Core:
 
 	def clearExpiredJobs(self):
 		self.expiredJobs = []
+
+	def cancelAllocations(self):
+		for vnf in self.tempVnfList:
+			self.capacity += vnf.cpuDemand
+			self.numa.memoryCapacity += vnf.memoryDemand
+		self.tempVnfList = []
+
+	def tempToAlloc(self):
+		self.vnfList += self.tempVnfList
+		self.tempVnfList = []
+
+	def tempAssign(self, vnf):
+		self.tempVnfList.append(vnf)
+		self.capacity -= vnf.cpuDemand
+		self.numa.memoryCapacity -= vnf.memoryDemand
+		
+		
+		#test
