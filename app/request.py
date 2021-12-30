@@ -12,8 +12,10 @@ class RequestModel:
 		self.maxCpu = 10
 		self.minMemory = 5
 		self.maxMemory = 10
-		self.sfcDuration = 7
-		self.vlBandwidth = 10
+		self.avgDuration = 7
+		self.avgarrivalTime = 5
+		self.maxVlBandwidth = 100
+		self.minVlBandwidth = 10
 
 	def generateVNF(self, vnfID, sfcID):
 		cpu = random.randint(self.minCpu, self.maxCpu)
@@ -25,8 +27,8 @@ class RequestModel:
 		vl = VirtualLink(vlID, vnf1, vnf2, vlBandwidth, sfcID)
 		return vl
 
-	def generateSFC(self, sfcID, numberVNFS):
-		sfc = SFC(sfcID, self.sfcDuration)
+	def generateSFC(self, sfcID, numberVNFS, duration, arrivalTime):
+		sfc = SFC(sfcID, duration, arrivalTime)
 		
 		for k in range(numberVNFS):
 			vnfID = sfcID + "_" + str(k)
@@ -35,15 +37,18 @@ class RequestModel:
 		
 		for k,v in enumerate(sfc.vnfList):
 			if k <= len(sfc.vnfList)-2: # dont consider the last vnf
-				vl = self.generateVirtualLink(k, sfc.vnfList[k], sfc.vnfList[k+1], self.vlBandwidth, sfcID)
+				vl = self.generateVirtualLink(k, sfc.vnfList[k], sfc.vnfList[k+1], random.randint(self.minVlBandwidth, self.maxVlBandwidth), sfcID)
 				sfc.linkList.append(vl)
 		return sfc
 
 
 	def generate(self, totalTime):
 		vnfNumbers = list(np.random.poisson(self.avgVnfs, totalTime))
-		for k,v in enumerate(vnfNumbers):
+		durationList = list(np.random.poisson(self.avgDuration,totalTime))
+		arrivalTimeList = list(np.random.poisson(self.avgarrivalTime, totalTime))
+		for k,v,d,a in zip(range(totalTime),vnfNumbers,durationList,arrivalTimeList):
 			sfcID = str(k)
-			sfc = self.generateSFC(sfcID,v)
+			sfc = self.generateSFC(sfcID,v,d,a)
 			self.sfcList.append(sfc)
 		return self.sfcList
+	
