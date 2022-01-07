@@ -42,11 +42,11 @@ class RequestModel:
 		return sfc
 
 
-	def generate(self, totalTime):
-		vnfNumbers = list(np.random.poisson(self.avgVnfs, totalTime))
-		durationList = list(np.random.poisson(self.avgDuration,totalTime))
-		arrivalTimeList = list(np.random.poisson(self.avgarrivalTime, totalTime))
-		for k,v,d,a in zip(range(totalTime),vnfNumbers,durationList,arrivalTimeList):
+	def generate(self, totalSFCs):
+		vnfNumbers = list(np.random.poisson(self.avgVnfs, totalSFCs))
+		durationList = list(np.random.poisson(self.avgDuration,totalSFCs))
+		arrivalTimeList = list(np.random.poisson(self.avgarrivalTime, totalSFCs))
+		for k,v,d,a in zip(range(totalSFCs),vnfNumbers,durationList,arrivalTimeList):
 			sfcID = str(k)
 			sfc = self.generateSFC(sfcID,v,d,a)
 			self.sfcList.append(sfc)
