@@ -117,8 +117,8 @@ class SubstrateModel:
 				vnfs2.append(link.vnf2)
 				links2.append(link)
 
-		sfc1ID = sfc.id + "_part1"
-		sfc2ID = sfc.id + "_part2"
+		sfc1ID = str(sfc.id) + "_part1"
+		sfc2ID = str(sfc.id) + "_part2"
 
 		sfc1 = SFC(sfc1ID, sfc.duration, sfc.arrivalTime)
 		sfc1.vnfList = vnfs1

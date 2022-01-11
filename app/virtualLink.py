@@ -1,6 +1,4 @@
 
-
-
 class VirtualLink:
 	def __init__(self, id, vnf1, vnf2, bandwidthDemand, sfcID):
 		self.id = id

@@ -29,7 +29,7 @@ class Schedule:
 		else: #search for candidate numas
 			candidateNumas = []
 			for numa in sub.numaList:
-				if numa.memoryCapacity >= sfc.getTotalMemory() and numa.getTotalCPU() >=  sfc.getTotalCPU(): # good candidate
+				if numa.memoryCapacity >= sfc.getTotalMemory() and numa.getTotalCPU() >= sfc.getTotalCPU(): # good candidate
 					candidateNumas.append(numa)
 			print("found ", len(candidateNumas), " candidate numas.")
 

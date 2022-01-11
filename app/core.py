@@ -43,6 +43,3 @@ class Core:
 		self.tempVnfList.append(vnf)
 		self.capacity -= vnf.cpuDemand
 		self.numa.memoryCapacity -= vnf.memoryDemand
-		
-		
-		#test
