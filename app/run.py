@@ -14,6 +14,9 @@ if __name__ == "__main__":
 	arrivalRate=np.random.poisson(AVERAGE, timehorizon)
 	for t in range(timehorizon):
 		#check and remove expired services
+		schedule.tick(sub)
+		schedule.checkForExpiredJobs(sub)
+		schedule.removeExpiredJobs(sub)
 		for idx in range(arrivalRate[t]):
 			id = idx if t < 1 else idx+sum(arrivalRate[:t-1])
 
